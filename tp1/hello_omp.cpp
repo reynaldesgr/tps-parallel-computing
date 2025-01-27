@@ -4,6 +4,7 @@
 
 
 #include <ctime>
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -12,6 +13,8 @@
 
 #define N_MAX 100
 #define SEED 478210368
+
+using namespace std;
 
 void multiply(int n, double A[N_MAX][N_MAX], double B[N_MAX][N_MAX], double C[N_MAX][N_MAX]) {
     for (int i = 0; i < n; i++) {
@@ -24,21 +27,24 @@ void multiply(int n, double A[N_MAX][N_MAX], double B[N_MAX][N_MAX], double C[N_
     }
 }
 
-void multiply_in_parallel(int n, double A[N_MAX][N_MAX], double B[N_MAX][N_MAX], double C[N_MAX][N_MAX]) {
-    int i, j, k;
-    #pragma omp parallel for collapse(2) shared(A, B, C) private(i, j, k)
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < n; j++) {
+void matrix_multiply_parallel(int n, double A[][100], double B[][100], double C[][100], const char* schedule_type) {
+#pragma omp parallel for schedule(dynamic) collapse(2)
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
             C[i][j] = 0;
-            for (k = 0; k < n; k++) {
+            int thread_num = omp_get_thread_num();
+            for (int k = 0; k < n; k++) {
                 C[i][j] += A[i][k] * B[k][j];
             }
+#pragma omp critical
+            cout << "Thread " << thread_num << " a calculé C[" << i << "][" << j << "] avec " << schedule_type << endl;
         }
     }
 }
 
+
 // Generate a random matrix
-void generate_random_matrix(int n, double matrix[100][100]) {
+void generate_random_matrix(int n, double matrix[N_MAX][N_MAX]) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++) {
             matrix[i][j] = (double)(rand() % 100) / 10.0; // Valeurs entre 0.0 et 9.9
@@ -57,40 +63,77 @@ void print_matrix(int n, double matrix[N_MAX][N_MAX]) {
     printf("\n");
 }
 
+// Verify results between sequential & parallel execution
+bool check_results(int n, double C1[N_MAX][N_MAX], double C2[N_MAX][N_MAX]) {
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (abs(C1[i][j] - C2[i][j]) > 1e-6) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
 int main(int argc, char *argv[]) {
     if (argc != 2) {
-        printf("Usage: %s <taille de la matrice>\n", argv[0]);
+        cerr << "Usage: " << argv[0] << " <taille de la matrice>" << endl;
         return 1;
     }
 
     int n = atoi(argv[1]);
-    if (n <= 0) {
-        printf("La taille de la matrice doit être un entier positif.\n");
+    if (n <= 0 || n > 100) {
+        cerr << "La taille de la matrice doit être un entier positif et <= 100." << endl;
         return 1;
     }
 
+    double A[N_MAX][N_MAX], B[N_MAX][N_MAX], C_seq[N_MAX][N_MAX], C_par[N_MAX][N_MAX];
 
-    double A[100][100], B[100][100], C[100][100];
-
-    srand(SEED);
+    srand(time(nullptr));
     generate_random_matrix(n, A);
     generate_random_matrix(n, B);
 
-    printf("Matrice A :\n");
+
+    cout << "Matrice A :" << endl;
     print_matrix(n, A);
-    printf("Matrice B :\n");
+    cout << "Matrice B :" << endl;
     print_matrix(n, B);
 
-    double start_time = omp_get_wtime();
-    multiply_in_parallel(n, A, B, C);
-    double end_time = omp_get_wtime();
 
-    printf("Matrice C (résultat) :\n");
-    print_matrix(n, C);
+    // Time
+    double start_seq = omp_get_wtime();
+    multiply(n, A, B, C_seq);
+    double end_seq = omp_get_wtime();
+    double time_seq = end_seq - start_seq;
+    cout << "Temps d'exécution séquentiel: " << (end_seq - start_seq) << " secondes" << endl;
 
-    printf("Temps d'exécution: %f secondes\n", end_time - start_time);
+    double start_par = omp_get_wtime();
+    matrix_multiply_parallel(n, A, B, C_par, "dynamic");
+    double end_par = omp_get_wtime();
+    double time_par = end_par - start_par;
+    cout << "Temps d'exécution parallèle (dynamic): " << time_par << " secondes" << endl;
 
-    return EXIT_SUCCESS;
+    start_par = omp_get_wtime();
+    matrix_multiply_parallel(n, A, B, C_par, "static");
+    end_par = omp_get_wtime();
+    cout << "Temps d'exécution parallèle (static): " << time_par << " secondes" << endl;
+
+    cout << "* Accélération obtenue: " << time_seq / time_par << "x \n" << endl;
+
+    // Results
+    cout << "Matrice C (résultat séquentielle) :" << endl;
+    print_matrix(n, C_seq);
+
+    cout << "Matrice C (résultat parallèle) :" << endl;
+    print_matrix(n, C_par);
+
+
+    if (check_results(n, C_seq, C_par)) {
+        cout << "Les résultats sont corrects." << endl;
+    } else {
+        cout << "Les résultats sont incorrects." << endl;
+    }
+
+    return 0;
     /*
   #pragma omp parallel num_threads(4) firstprivate(tid)
   {

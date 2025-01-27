@@ -101,14 +101,78 @@ Lecture de la taille de la matrice depuis la ligne de commande et produit matric
 
 2. **Parties parallélisables**
 
-- Boucle sur les lignes : car les lignes sont indépendantes entre elles
-  Chaque ligne de A est utilisée uniquement pour une ligne spécifique de C, ce qui évite tout conflit d'accès aux données.
-  
-Exemple avec n = 3 : 
+- Boucle sur les lignes : car les lignes sont indépendantes entre elles.
 
-  $\begin{aligned}
-  C[0][0] &= A[0][0] \times B[0][0] + A[0][1] \times B[1][0] + A[0][2] \times B[2][0] \\
-  C[0][1] &= A[0][0] \times B[0][1] + A[0][1] \times B[1][1] + A[0][2] \times B[2][1] \\
-  C[0][2] &= A[0][0] \times B[0][2] + A[0][1] \times B[1][2] + A[0][2] \times B[2][2]
-  \end{aligned}$
+  Chaque ligne de A est utilisée uniquement pour une ligne spécifique de C, ce qui évite tout conflit d'accès aux données.
+
 - Boucle sur les colonnes si i est déjà parallélisée
+
+3. **Variables**
+
+| Variable        | Portée   | Justification                                                                                    |
+|----------------|----------|--------------------------------------------------------------------------------------------------|
+| `A`             | `shared`  | Utilisée en **lecture seule** par tous les threads. Pas de risque de conflits.                   |
+| `B`             | `shared`  | Utilisée en **lecture seule** par tous les threads. Pas de risque de conflits.                   |
+| `C`             | `shared`  | Chaque élément est modifié indépendamment. Gestion des conflits nécessaire (ex. `critical`).     |
+| `i, j, k`       | `private` | Variables d'indexation des boucles, propres à chaque thread pour éviter les conflits d'écriture. |
+| `thread_num`    | `private` | Identifiant du thread utilisé uniquement pour l'affichage, propre à chaque thread.               |
+| `schedule_type` | `shared`  | Constante en entrée du programme, utilisée par tous les threads sans modification.               |
+
+
+4. **Résultats sequential. VS parallel.**
+
+Les résultats obtenus sont cohérents :
+
+```
+./tp1 5 :
+
+Matrice A :
+  0.10   0.40   2.30   5.60   1.30 
+  0.50   5.60   1.60   2.10   8.10 
+  4.60   9.90   5.80   6.80   5.70 
+  9.20   5.40   2.40   2.50   5.90 
+  6.10   5.70   2.80   7.60   3.10 
+
+Matrice B :
+  1.50   4.30   6.80   9.40   4.20 
+  5.00   9.50   4.60   7.40   0.30 
+  1.10   3.10   1.10   8.00   5.30 
+  9.30   2.60   0.40   5.10   9.40 
+  1.30   4.30   0.00   3.70   6.80 
+
+Temps d'exécution séquentiel: 3.048e-06 secondes
+Temps d'exécution parallèle: 0.0265903 secondes
+* Accélération obtenue: 0.000114628x 
+
+Matrice C (résultat séquentielle) :
+ 58.45  31.51   7.29  55.67  74.21 
+ 60.57 100.60  31.76  99.62  87.08 
+133.43 174.00  85.92 218.67 155.71 
+ 74.36 130.17  91.04 180.22 116.60 
+115.44 122.15  73.82 172.15 134.69 
+
+Matrice C (résultat parallèle) :
+ 58.45  31.51   7.29  55.67  74.21 
+ 60.57 100.60  31.76  99.62  87.08 
+133.43 174.00  85.92 218.67 155.71 
+ 74.36 130.17  91.04 180.22 116.60 
+115.44 122.15  73.82 172.15 134.69 
+
+Les résultats sont corrects.
+
+```
+
+5. **Répartition des tâches & Static VS Dynamic**
+
+Les clauses ``schedule(static)`` et ``schedule(dynamic)`` contrôlent la manière dont les itérations d'une boucle parallèle sont réparties entre les threads.
+
+Avec l'**ordonnancement statique**, les itérations sont réparties à l'avance entre les threads, de manière équitable et prévisible.
+
+Avec l'**ordonnancement dynamique**, les itérations sont assignées aux threads à la demande, c'est-à-dire qu'un thread termine une itération et prend la suivante disponible.
+
+6. **Temps d'exécution sur des matrices 100x100**
+```
+Temps d'exécution séquentiel: 0.0086048 secondes
+Temps d'exécution parallèle: 0.00238909 secondes
+* Accélération obtenue: 3.60171x 
+```
