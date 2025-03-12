@@ -1,0 +1,129 @@
+===== MPI Test Execution Started =====
+Date: mer. 12 mars 2025 08:56:55 CET
+
+Compiling the programs...
+Compilation completed.
+
+===== Running test for case 2.a =====
+Testing with 4 processes...
+
+real	0m0,315s
+user	0m0,075s
+sys	0m0,095s
+
+Testing with 8 processes...
+
+real	0m0,271s
+user	0m0,133s
+sys	0m0,267s
+
+Testing with 16 processes...
+
+real	0m0,487s
+user	0m2,397s
+sys	0m0,388s
+
+Testing with 32 processes...
+
+real	0m1,017s
+user	0m7,705s
+sys	0m0,877s
+
+===== Running test for case 2.b =====
+Testing with 4 processes...
+
+real	0m0,256s
+user	0m0,049s
+sys	0m0,125s
+
+Testing with 8 processes...
+
+real	0m0,523s
+user	0m2,569s
+sys	0m0,792s
+
+Testing with 32 processes...
+
+real	0m0,980s
+user	0m7,416s
+sys	0m1,355s
+
+===== MPI Test Execution Completed =====
+
+
+===== Running test for case 2.a =====
+Testing with 4 processes...
+Process Process 2 generated: 57
+Process 3 generated: 76
+0 generated: 34
+Process 1 generated: 55
+Sorted array: 34 55 57 76 
+Testing with 8 processes...
+Process 0 generated: 34Process 1 generated: 55
+Process 3 generated: 76
+Process 4 generated: 33
+Process 5 generated: 3
+Process 6 generated: 40
+Process 7 generated: 92
+
+Process 2 generated: 57
+Sorted array: 3 33 34 40 55 57 76 92 
+Testing with 16 processes...
+Process 1 generated: 57
+Process 2 generated: 76
+Process 3 generated: 33
+Process 4 generated: 3
+Process 5 generated: 40
+Process 6 generated: 92
+Process 9 generated: 18
+Process 10 generated: 5
+Process 11 generated: 91
+Process 12 generated: 29
+Process 13 generated: 12
+Process 14 generated: 44
+Process 0 generated: 55
+Process 8 generated: 25
+Process 7 generated: Process 15 generated: 95
+14
+Sorted array: 3 5 12 14 18 25 29 33 40 44 55 57 76 91 92 95 
+Testing with 32 processes...
+Process 0 generated: 57
+Process 2 generated: 33
+Process 6 generated: 14
+Process 10 generated: 91
+Process 14 generated: 95
+Process 16 generated: 28
+Process 18 generated: 64
+Process 22 generated: 21
+Process 30 generated: 35
+Process 26Process 4 generated: 40
+Process 20 generated: 60
+ generated: 10
+Process 12 generated: 12
+Process 1 generated: 76
+Process 5 generated: 92
+Process 7 generated: 25
+Process 9 generated: 5
+Process 11 generated: 29
+Process 15 generated: 32
+Process 21 generated: 49
+Process 23 generated: 49
+Process 25 generated: 11
+Process 27 generated: 88
+Process 31 generated: 91
+Process 17 generated: 20
+Process 3 generated: 3
+Process 13 generated: 44
+Process 24 generated: 54
+Process 28 generated: 33
+Process 29 generated: 45
+Process 8 generated: 18
+Process 19 generated: 94
+Sorted array: 3 5 10 11 12 14 18 20 21 25 28 29 32 33 33 35 40 44 45 49 49 54 57 60 64 76 88 91 91 92 94 95 
+===== Running test for case 2.b =====
+Testing with 4 processes...
+Sorted array: 3 8 8 17 33 33 39 44 48 57 61 67 67 76 89 92 
+Testing with 8 processes...
+Sorted array: 3 6 8 8 14 14 17 25 28 33 33 35 39 40 40 44 
+Testing with 16 processes...
+Sorted array: 0 3 3 5 6 8 8 10 12 12 14 14 15 17 18 20 
