@@ -6,8 +6,7 @@ echo "===== MPI Test Execution Started =====" > $LOGFILE
 echo "Date: $(date)" >> $LOGFILE
 echo "" >> $LOGFILE
 
-# Compile the programs
-echo "Compiling the programs..." | tee -a $LOGFILE
+echo "Compiling.." | tee -a $LOGFILE
 mpic++ -o tri_mpi_2a tri_mpi_2a.cpp
 mpic++ -o tri_mpi_2b tri_mpi_2b.cpp
 echo "Compilation completed." | tee -a $LOGFILE
